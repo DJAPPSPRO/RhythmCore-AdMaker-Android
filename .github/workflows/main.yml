@@ -31,6 +31,15 @@ jobs:
           mkdir -p android-project
           unzip -o RhythmCore-AdMaker-Android-v1.0.zip -d android-project
 
+      - name: Inspect renderer source
+        run: |
+          PROJECT_DIR="$(find android-project -name settings.gradle.kts -type f -printf '%h\n' | head -n 1)"
+          SOURCE="$PROJECT_DIR/app/src/main/java/com/rhythmcoredj/admaker/MainActivity.kt"
+          echo "=== SOURCE 250-390 ==="
+          sed -n '250,390p' "$SOURCE"
+          echo "=== SOURCE 390-520 ==="
+          sed -n '390,520p' "$SOURCE"
+
       - name: Fix JVM target
         run: |
           PROJECT_DIR="$(find android-project -name settings.gradle.kts -type f -printf '%h\n' | head -n 1)"
