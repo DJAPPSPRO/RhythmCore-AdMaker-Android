@@ -31,44 +31,284 @@ jobs:
           mkdir -p android-project
           unzip -o RhythmCore-AdMaker-Android-v1.0.zip -d android-project
 
-      - name: Inspect renderer source
+      - name: Upgrade effects and RhythmCoreDJ intro outro
         run: |
           PROJECT_DIR="$(find android-project -name settings.gradle.kts -type f -printf '%h\n' | head -n 1)"
           SOURCE="$PROJECT_DIR/app/src/main/java/com/rhythmcoredj/admaker/MainActivity.kt"
-          echo "=== SOURCE 250-390 ==="
-          sed -n '250,390p' "$SOURCE"
-          echo "=== SOURCE 390-520 ==="
-          sed -n '390,520p' "$SOURCE"
+          python3 - "$SOURCE" <<'PY'
+          import sys, re
+          p = sys.argv[1]
+          s = open(p, "r", encoding="utf-8").read()
+
+          start = s.index("    private fun makeMediaItem(")
+          end = s.index("    private fun buildStaticTitleSequence(", start)
+          new_media = r'''    private fun makeMediaItem(uri: Uri, slotMs: Long, index: Int): EditedMediaItem {
+              val mime = contentResolver.getType(uri).orEmpty()
+              val isVideo = mime.startsWith("video/")
+              val media = if (isVideo) {
+                  MediaItem.Builder()
+                      .setUri(uri)
+                      .setClippingConfiguration(
+                          MediaItem.ClippingConfiguration.Builder()
+                              .setStartPositionMs(0)
+                              .setEndPositionMs(slotMs)
+                              .build()
+                      )
+                      .build()
+              } else {
+                  MediaItem.Builder().setUri(uri).setImageDurationMs(slotMs).build()
+              }
+
+              val visualEffects = mutableListOf<Effect>()
+              visualEffects += Presentation.createForWidthAndHeight(
+                  1080, 1920, Presentation.LAYOUT_SCALE_TO_FIT_WITH_CROP
+              )
+
+              // 25 deliberately different visual recipes.
+              // A fresh random choice is made for every media item on every render.
+              when (Random.nextInt(25)) {
+                  0 -> {
+                      visualEffects += Contrast(0.35f)
+                      visualEffects += ScaleAndRotateTransformation.Builder().setScale(1.08f, 1.08f).build()
+                  }
+                  1 -> {
+                      visualEffects += Contrast(-0.18f)
+                      visualEffects += RgbAdjustment.Builder().setRedScale(1.18f).setGreenScale(0.88f).setBlueScale(0.82f).build()
+                  }
+                  2 -> {
+                      visualEffects += Contrast(0.22f)
+                      visualEffects += RgbAdjustment.Builder().setRedScale(0.82f).setGreenScale(0.94f).setBlueScale(1.22f).build()
+                  }
+                  3 -> {
+                      visualEffects += ScaleAndRotateTransformation.Builder().setScale(1.14f, 1.14f).setRotationDegrees(2.2f).build()
+                  }
+                  4 -> {
+                      visualEffects += ScaleAndRotateTransformation.Builder().setScale(1.10f, 1.10f).setRotationDegrees(-2.4f).build()
+                      visualEffects += Contrast(0.18f)
+                  }
+                  5 -> {
+                      visualEffects += RgbAdjustment.Builder().setRedScale(1.20f).setGreenScale(1.02f).setBlueScale(0.72f).build()
+                      visualEffects += ScaleAndRotateTransformation.Builder().setScale(1.06f, 1.06f).build()
+                  }
+                  6 -> {
+                      visualEffects += RgbAdjustment.Builder().setRedScale(0.78f).setGreenScale(1.12f).setBlueScale(1.20f).build()
+                      visualEffects += Contrast(0.16f)
+                  }
+                  7 -> {
+                      visualEffects += Contrast(0.55f)
+                      visualEffects += RgbAdjustment.Builder().setRedScale(0.93f).setGreenScale(0.93f).setBlueScale(0.93f).build()
+                  }
+                  8 -> {
+                      visualEffects += Contrast(-0.28f)
+                      visualEffects += ScaleAndRotateTransformation.Builder().setScale(1.13f, 1.13f).build()
+                  }
+                  9 -> {
+                      visualEffects += RgbAdjustment.Builder().setRedScale(1.28f).setGreenScale(0.78f).setBlueScale(1.05f).build()
+                      visualEffects += Contrast(0.26f)
+                  }
+                  10 -> {
+                      visualEffects += RgbAdjustment.Builder().setRedScale(0.78f).setGreenScale(1.22f).setBlueScale(0.90f).build()
+                      visualEffects += ScaleAndRotateTransformation.Builder().setScale(1.08f, 1.08f).setRotationDegrees(1.4f).build()
+                  }
+                  11 -> {
+                      visualEffects += Contrast(0.42f)
+                      visualEffects += ScaleAndRotateTransformation.Builder().setScale(1.16f, 1.16f).setRotationDegrees(-1.2f).build()
+                  }
+                  12 -> {
+                      visualEffects += RgbAdjustment.Builder().setRedScale(1.14f).setGreenScale(0.86f).setBlueScale(0.70f).build()
+                      visualEffects += Contrast(0.38f)
+                  }
+                  13 -> {
+                      visualEffects += RgbAdjustment.Builder().setRedScale(0.72f).setGreenScale(0.82f).setBlueScale(1.28f).build()
+                      visualEffects += ScaleAndRotateTransformation.Builder().setScale(1.11f, 1.11f).build()
+                  }
+                  14 -> {
+                      visualEffects += Contrast(0.12f)
+                      visualEffects += ScaleAndRotateTransformation.Builder().setScale(1.18f, 1.04f).build()
+                  }
+                  15 -> {
+                      visualEffects += Contrast(0.30f)
+                      visualEffects += ScaleAndRotateTransformation.Builder().setScale(1.04f, 1.18f).build()
+                  }
+                  16 -> {
+                      visualEffects += RgbAdjustment.Builder().setRedScale(1.24f).setGreenScale(0.96f).setBlueScale(0.84f).build()
+                      visualEffects += ScaleAndRotateTransformation.Builder().setScale(1.12f, 1.12f).setRotationDegrees(3.0f).build()
+                  }
+                  17 -> {
+                      visualEffects += RgbAdjustment.Builder().setRedScale(0.84f).setGreenScale(1.04f).setBlueScale(1.25f).build()
+                      visualEffects += ScaleAndRotateTransformation.Builder().setScale(1.12f, 1.12f).setRotationDegrees(-3.0f).build()
+                  }
+                  18 -> {
+                      visualEffects += Contrast(0.62f)
+                      visualEffects += ScaleAndRotateTransformation.Builder().setScale(1.05f, 1.05f).build()
+                  }
+                  19 -> {
+                      visualEffects += Contrast(-0.35f)
+                      visualEffects += RgbAdjustment.Builder().setRedScale(1.18f).setGreenScale(1.10f).setBlueScale(0.76f).build()
+                  }
+                  20 -> {
+                      visualEffects += RgbAdjustment.Builder().setRedScale(0.74f).setGreenScale(1.18f).setBlueScale(1.08f).build()
+                      visualEffects += ScaleAndRotateTransformation.Builder().setScale(1.15f, 1.15f).build()
+                  }
+                  21 -> {
+                      visualEffects += Contrast(0.48f)
+                      visualEffects += RgbAdjustment.Builder().setRedScale(1.16f).setGreenScale(0.82f).setBlueScale(1.16f).build()
+                  }
+                  22 -> {
+                      visualEffects += Contrast(0.20f)
+                      visualEffects += ScaleAndRotateTransformation.Builder().setScale(1.20f, 1.20f).setRotationDegrees(0.8f).build()
+                  }
+                  23 -> {
+                      visualEffects += Contrast(0.32f)
+                      visualEffects += RgbAdjustment.Builder().setRedScale(0.88f).setGreenScale(0.88f).setBlueScale(1.30f).build()
+                      visualEffects += ScaleAndRotateTransformation.Builder().setScale(1.08f, 1.08f).build()
+                  }
+                  else -> {
+                      visualEffects += Contrast(0.40f)
+                      visualEffects += RgbAdjustment.Builder().setRedScale(1.30f).setGreenScale(0.82f).setBlueScale(0.76f).build()
+                      visualEffects += ScaleAndRotateTransformation.Builder().setScale(1.10f, 1.10f).setRotationDegrees(-1.6f).build()
+                  }
+              }
+
+              return EditedMediaItem.Builder(media)
+                  .setFrameRate(30)
+                  .setRemoveAudio(true)
+                  .setEffects(Effects(ImmutableList.of(), ImmutableList.copyOf(visualEffects)))
+                  .build()
+          }
+
+          '''
+          s = s[:start] + new_media + s[end:]
+
+          # Make the intro/outro long enough to be obvious.
+          s = s.replace("val count = 8", "val count = 14")
+          s = s.replace("val perFrame = max(70L, totalMs / count)", "val perFrame = max(90L, totalMs / count)")
+
+          t0 = s.index("    private fun makeTitleBitmap(")
+          t1 = s.index("    private fun saveToGallery()", t0)
+          new_title = r'''    private fun makeTitleBitmap(text: String, frame: Int, intro: Boolean): Bitmap {
+              val w = 1080
+              val h = 1920
+              val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+              val c = Canvas(bitmap)
+
+              // Urban concrete / pasted-poster base.
+              c.drawColor(Color.rgb(10, 10, 12))
+              val grit = Paint()
+              repeat(1800) {
+                  val g = Random.nextInt(18, 82)
+                  grit.color = Color.argb(Random.nextInt(24, 95), g, g, g)
+                  val x = Random.nextInt(w).toFloat()
+                  val y = Random.nextInt(h).toFloat()
+                  val r = Random.nextInt(1, 7).toFloat()
+                  c.drawCircle(x, y, r, grit)
+              }
+
+              // Graffiti / paint streaks.
+              val streak = Paint().apply { strokeCap = Paint.Cap.ROUND }
+              repeat(22) {
+                  streak.strokeWidth = Random.nextInt(5, 26).toFloat()
+                  val palette = when ((it + frame) % 4) {
+                      0 -> Color.rgb(190, 44, 220)
+                      1 -> Color.rgb(30, 210, 220)
+                      2 -> Color.rgb(245, 110, 35)
+                      else -> Color.rgb(230, 230, 230)
+                  }
+                  streak.color = Color.argb(Random.nextInt(30, 110), Color.red(palette), Color.green(palette), Color.blue(palette))
+                  val y = Random.nextInt(h).toFloat()
+                  c.drawLine(Random.nextInt(-120, 200).toFloat(), y, Random.nextInt(800, 1220).toFloat(), y + Random.nextInt(-70, 71), streak)
+              }
+
+              // Heavy analog static / scan lines.
+              val staticPaint = Paint()
+              repeat(520) {
+                  val gray = Random.nextInt(45, 220)
+                  staticPaint.color = Color.argb(Random.nextInt(28, 145), gray, gray, gray)
+                  val y = Random.nextInt(h).toFloat()
+                  c.drawRect(0f, y, w.toFloat(), y + Random.nextInt(1, 6), staticPaint)
+              }
+
+              // Glitch bars.
+              repeat(18) {
+                  val alpha = Random.nextInt(45, 155)
+                  val col = if ((it + frame) % 2 == 0) Color.argb(alpha, 190, 45, 225) else Color.argb(alpha, 20, 210, 220)
+                  staticPaint.color = col
+                  val y = Random.nextInt(h)
+                  val left = Random.nextInt(-100, 180)
+                  val right = Random.nextInt(780, 1180)
+                  c.drawRect(left.toFloat(), y.toFloat(), right.toFloat(), (y + Random.nextInt(5, 34)).toFloat(), staticPaint)
+              }
+
+              val centerY = h / 2f
+              val jitterX = Random.nextInt(-32, 33).toFloat()
+              val jitterY = Random.nextInt(-22, 23).toFloat()
+
+              val main = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                  textAlign = Paint.Align.CENTER
+                  typeface = Typeface.create(Typeface.SANS_SERIF_CONDENSED, Typeface.BOLD)
+                  textSize = 150f
+                  letterSpacing = 0.04f
+              }
+
+              // Distressed shadow / offset print.
+              main.style = Paint.Style.STROKE
+              main.strokeWidth = 18f
+              main.color = Color.rgb(25, 210, 215)
+              c.drawText("RHYTHMCORE", w / 2f + jitterX + 16f, centerY - 40f + jitterY, main)
+              c.drawText("DJ", w / 2f + jitterX + 16f, centerY + 165f + jitterY, main)
+
+              main.strokeWidth = 11f
+              main.color = Color.rgb(190, 45, 225)
+              c.drawText("RHYTHMCORE", w / 2f + jitterX - 12f, centerY - 40f + jitterY, main)
+              c.drawText("DJ", w / 2f + jitterX - 12f, centerY + 165f + jitterY, main)
+
+              main.style = Paint.Style.FILL
+              main.color = if (frame % 4 == 0) Color.rgb(245, 118, 38) else Color.WHITE
+              c.drawText("RHYTHMCORE", w / 2f + jitterX, centerY - 40f + jitterY, main)
+              main.textSize = 205f
+              c.drawText("DJ", w / 2f + jitterX, centerY + 175f + jitterY, main)
+
+              val sub = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                  color = Color.LTGRAY
+                  textAlign = Paint.Align.CENTER
+                  typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
+                  textSize = 38f
+                  letterSpacing = 0.12f
+              }
+              c.drawText(if (intro) "URBAN • GRITTY • AUTOMATED" else "RHYTHMCOREDJ.COM", w / 2f, centerY + 310f, sub)
+
+              // Frame-edge dirty film scratches.
+              val scratch = Paint().apply { strokeWidth = 3f }
+              repeat(90) {
+                  scratch.color = Color.argb(Random.nextInt(30, 120), 235, 235, 235)
+                  val x = Random.nextInt(w).toFloat()
+                  c.drawLine(x, 0f, x + Random.nextInt(-12, 13), h.toFloat(), scratch)
+              }
+
+              return bitmap
+          }
+
+          '''
+          s = s[:t0] + new_title + s[t1:]
+
+          open(p, "w", encoding="utf-8").write(s)
+          PY
 
       - name: Fix JVM target
         run: |
           PROJECT_DIR="$(find android-project -name settings.gradle.kts -type f -printf '%h\n' | head -n 1)"
           APP_GRADLE="$PROJECT_DIR/app/build.gradle.kts"
           printf '\n%s\n' 'kotlin {' '    jvmToolchain(17)' '}' '' 'android {' '    compileOptions {' '        sourceCompatibility = JavaVersion.VERSION_17' '        targetCompatibility = JavaVersion.VERSION_17' '    }' '}' >> "$APP_GRADLE"
-          echo "=== PATCHED app/build.gradle.kts ==="
-          cat "$APP_GRADLE"
-
-      - name: Fix Media3 effect generic
-        run: |
-          PROJECT_DIR="$(find android-project -name settings.gradle.kts -type f -printf '%h\n' | head -n 1)"
-          SOURCE="$PROJECT_DIR/app/src/main/java/com/rhythmcoredj/admaker/MainActivity.kt"
-          sed -i '342s/ImmutableList.of(/ImmutableList.of<Effect>(/' "$SOURCE"
-          sed -n '338,346p' "$SOURCE"
 
       - name: Build APK
         run: |
           PROJECT_DIR="$(find android-project -name settings.gradle.kts -type f -printf '%h\n' | head -n 1)"
-          if [ -z "$PROJECT_DIR" ]; then
-            echo "ERROR: Android project root was not found."
-            exit 1
-          fi
           cd "$PROJECT_DIR"
           gradle assembleDebug --stacktrace
 
       - name: Locate APK
         if: always()
         run: |
-          echo "=== APK FILES ==="
           find android-project -type f -name "*.apk" -print || true
 
       - name: Upload APK
