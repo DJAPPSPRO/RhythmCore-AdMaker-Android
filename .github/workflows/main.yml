@@ -245,7 +245,7 @@ jobs:
 
               val main = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                   textAlign = Paint.Align.CENTER
-                  typeface = Typeface.create(Typeface.SANS_SERIF_CONDENSED, Typeface.BOLD)
+                  typeface = Typeface.create("sans-serif-condensed", Typeface.BOLD)
                   textSize = 150f
                   letterSpacing = 0.04f
               }
