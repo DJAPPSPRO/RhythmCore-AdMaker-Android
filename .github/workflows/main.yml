@@ -180,9 +180,42 @@ jobs:
           '''
           s = s[:start] + new_media + s[end:]
 
-          # Make the intro/outro long enough to be obvious.
-          s = s.replace("val count = 8", "val count = 14")
-          s = s.replace("val perFrame = max(70L, totalMs / count)", "val perFrame = max(90L, totalMs / count)")
+          seq0 = s.index("    private fun buildStaticTitleSequence(")
+          seq1 = s.index("    private fun makeTitleBitmap(", seq0)
+          new_seq = r'''    private fun buildStaticTitleSequence(text: String, totalMs: Long, intro: Boolean): List<EditedMediaItem> {
+              val count = 14
+              val perFrame = max(90L, totalMs / count)
+              return (0 until count).map { i ->
+                  val bmp = makeTitleBitmap(text, i, intro)
+                  val file = File(cacheDir, "rc_title_${if (intro) "in" else "out"}_${System.nanoTime()}_$i.png")
+                  FileOutputStream(file).use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                  bmp.recycle()
+
+                  val media = MediaItem.Builder()
+                      .setUri(Uri.fromFile(file))
+                      .setImageDurationMs(perFrame)
+                      .build()
+
+                  val titleEffects = mutableListOf<Effect>()
+                  titleEffects += Presentation.createForWidthAndHeight(
+                      1080, 1920, Presentation.LAYOUT_SCALE_TO_FIT
+                  )
+
+                  EditedMediaItem.Builder(media)
+                      .setFrameRate(30)
+                      .setRemoveAudio(true)
+                      .setEffects(
+                          Effects(
+                              ImmutableList.of(),
+                              ImmutableList.copyOf(titleEffects)
+                          )
+                      )
+                      .build()
+              }
+          }
+
+          '''
+          s = s[:seq0] + new_seq + s[seq1:]
 
           t0 = s.index("    private fun makeTitleBitmap(")
           t1 = s.index("    private fun saveToGallery()", t0)
