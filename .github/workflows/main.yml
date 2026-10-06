@@ -15,32 +15,35 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
 
       - name: Unpack Android project
         run: |
           rm -rf android-project
           mkdir -p android-project
           unzip -o RhythmCore-AdMaker-Android-v1.0.zip -d android-project
-          echo "=== ZIP CONTENTS ==="
+          echo "=== PROJECT FILES ==="
           find android-project -maxdepth 4 -type f | sort
 
       - name: Build APK
         run: |
-          GRADLEW="$(find android-project -name gradlew -type f | head -n 1)"
-          if [ -z "$GRADLEW" ]; then
-            echo "ERROR: gradlew was not found inside the uploaded ZIP."
+          PROJECT_DIR="$(find android-project -name settings.gradle.kts -type f -printf '%h\n' | head -n 1)"
+          if [ -z "$PROJECT_DIR" ]; then
+            echo "ERROR: Android project root was not found."
             exit 1
           fi
-
-          PROJECT_DIR="$(dirname "$GRADLEW")"
           echo "Project folder: $PROJECT_DIR"
           cd "$PROJECT_DIR"
-          chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          gradle --version
+          gradle assembleDebug --stacktrace
 
       - name: Locate APK
         if: always()
