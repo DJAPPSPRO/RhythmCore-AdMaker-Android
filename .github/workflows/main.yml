@@ -30,8 +30,26 @@ jobs:
           rm -rf android-project
           mkdir -p android-project
           unzip -o RhythmCore-AdMaker-Android-v1.0.zip -d android-project
-          echo "=== PROJECT FILES ==="
-          find android-project -maxdepth 4 -type f | sort
+
+      - name: Fix JVM target
+        run: |
+          PROJECT_DIR="$(find android-project -name settings.gradle.kts -type f -printf '%h\n' | head -n 1)"
+          APP_GRADLE="$PROJECT_DIR/app/build.gradle.kts"
+          cat >> "$APP_GRADLE" <<'EOF'
+
+kotlin {
+    jvmToolchain(17)
+}
+
+android {
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+EOF
+          echo "=== PATCHED app/build.gradle.kts ==="
+          cat "$APP_GRADLE"
 
       - name: Build APK
         run: |
@@ -40,9 +58,7 @@ jobs:
             echo "ERROR: Android project root was not found."
             exit 1
           fi
-          echo "Project folder: $PROJECT_DIR"
           cd "$PROJECT_DIR"
-          gradle --version
           gradle assembleDebug --stacktrace
 
       - name: Locate APK
