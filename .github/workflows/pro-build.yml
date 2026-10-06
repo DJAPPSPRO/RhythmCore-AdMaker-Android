@@ -1,9 +1,59 @@
 name: Pro APK Build
+
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - run: echo "ready"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
+
+      - name: Unpack base Android project
+        run: |
+          rm -rf android-project
+          mkdir -p android-project
+          unzip -o RhythmCore-AdMaker-Android-v1.0.zip -d android-project
+          PROJECT_DIR="$(find android-project -name settings.gradle.kts -type f -printf '%h\n' | head -n 1)"
+          test -n "$PROJECT_DIR"
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+
+      - name: Install professional source
+        run: |
+          base64 -d pro-source/MainActivity.kt.gz.b64 | gzip -d > "$PROJECT_DIR/app/src/main/java/com/rhythmcoredj/admaker/MainActivity.kt"
+          mkdir -p "$PROJECT_DIR/app/src/main/res/drawable-nodpi"
+          curl -fL --retry 3 "https://rhythmcore-admaker.floot.app/_cdn/static/6cb52c36-6a55-46f7-8780-554668849dbb-rhythmcore_graffiti_tiny.jpg" -o "$PROJECT_DIR/app/src/main/res/drawable-nodpi/rhythmcore_graffiti.jpg"
+          test -s "$PROJECT_DIR/app/src/main/res/drawable-nodpi/rhythmcore_graffiti.jpg"
+
+      - name: Configure Java 17
+        run: |
+          APP_GRADLE="$PROJECT_DIR/app/build.gradle.kts"
+          printf '\n%s\n' 'kotlin {' '    jvmToolchain(17)' '}' '' 'android {' '    compileOptions {' '        sourceCompatibility = JavaVersion.VERSION_17' '        targetCompatibility = JavaVersion.VERSION_17' '    }' '}' >> "$APP_GRADLE"
+
+      - name: Build APK
+        run: |
+          cd "$PROJECT_DIR"
+          gradle assembleDebug --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: RhythmCore-AdMaker-Pro-APK
+          path: android-project/**/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
