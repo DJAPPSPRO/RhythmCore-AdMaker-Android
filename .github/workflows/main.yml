@@ -39,6 +39,13 @@ jobs:
           echo "=== PATCHED app/build.gradle.kts ==="
           cat "$APP_GRADLE"
 
+      - name: Fix Media3 effect generic
+        run: |
+          PROJECT_DIR="$(find android-project -name settings.gradle.kts -type f -printf '%h\n' | head -n 1)"
+          SOURCE="$PROJECT_DIR/app/src/main/java/com/rhythmcoredj/admaker/MainActivity.kt"
+          sed -i '342s/ImmutableList.of(/ImmutableList.of<Effect>(/' "$SOURCE"
+          sed -n '338,346p' "$SOURCE"
+
       - name: Build APK
         run: |
           PROJECT_DIR="$(find android-project -name settings.gradle.kts -type f -printf '%h\n' | head -n 1)"
