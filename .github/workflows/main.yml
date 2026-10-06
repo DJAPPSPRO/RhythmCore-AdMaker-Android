@@ -588,7 +588,7 @@ jobs:
                   textAlign = Paint.Align.CENTER
                   typeface = Typeface.create("sans-serif-black", Typeface.BOLD_ITALIC)
                   textSkewX = -0.16f
-                  fakeBoldText = true
+                  isFakeBoldText = true
                   letterSpacing = -0.02f
               }
 
