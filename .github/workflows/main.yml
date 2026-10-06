@@ -35,19 +35,7 @@ jobs:
         run: |
           PROJECT_DIR="$(find android-project -name settings.gradle.kts -type f -printf '%h\n' | head -n 1)"
           APP_GRADLE="$PROJECT_DIR/app/build.gradle.kts"
-          cat >> "$APP_GRADLE" <<'EOF'
-
-kotlin {
-    jvmToolchain(17)
-}
-
-android {
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-}
-EOF
+          printf '\n%s\n' 'kotlin {' '    jvmToolchain(17)' '}' '' 'android {' '    compileOptions {' '        sourceCompatibility = JavaVersion.VERSION_17' '        targetCompatibility = JavaVersion.VERSION_17' '    }' '}' >> "$APP_GRADLE"
           echo "=== PATCHED app/build.gradle.kts ==="
           cat "$APP_GRADLE"
 
