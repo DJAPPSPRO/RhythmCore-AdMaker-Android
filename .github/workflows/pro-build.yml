@@ -29,7 +29,7 @@ jobs:
         run: |
           rm -rf android-project
           mkdir -p android-project
-          curl -fL --retry 3 "https://rhythmcore-admaker.floot.app/_cdn/static/5815e5e1-cc44-419f-9eff-be4133f77db5-RhythmCore-AdMaker-Android-v7.0.9-MAC-TRANSITIONS-source.zip" -o /tmp/macmatch.zip
+          curl -fL --retry 3 "https://rhythmcore-admaker.floot.app/_cdn/static/b16a080a-c43c-4aca-9a61-465e9a121bfa-RhythmCore-AdMaker-Android-v7.0.9-MAC-TRANSITIONS-source-v2.zip" -o /tmp/macmatch.zip
           unzip -o /tmp/macmatch.zip -d android-project
           test -f android-project/app/src/main/java/com/rhythmcoredj/admaker/MainActivity.kt
 
