@@ -1,4 +1,4 @@
-name: Mac Match Super Gritty APK Build
+name: Mac Transition Match APK Build
 
 on:
   workflow_dispatch:
@@ -25,14 +25,13 @@ jobs:
         with:
           gradle-version: "8.13"
 
-      - name: Download Mac-match super gritty source
+      - name: Download Mac transition-match source
         run: |
           rm -rf android-project
           mkdir -p android-project
-          curl -fL --retry 3 "https://rhythmcore-admaker.floot.app/_cdn/static/5751e972-7ad1-4411-82c6-9053f96900a2-RhythmCore-AdMaker-Android-MacMatch-v7.0.8-SUPER-GRITTY-BW-source.zip" -o /tmp/macmatch.zip
+          curl -fL --retry 3 "https://rhythmcore-admaker.floot.app/_cdn/static/5815e5e1-cc44-419f-9eff-be4133f77db5-RhythmCore-AdMaker-Android-v7.0.9-MAC-TRANSITIONS-source.zip" -o /tmp/macmatch.zip
           unzip -o /tmp/macmatch.zip -d android-project
           test -f android-project/app/src/main/java/com/rhythmcoredj/admaker/MainActivity.kt
-          test -f android-project/app/src/main/res/drawable-nodpi/rhythmcore_graffiti.webp
 
       - name: Build APK
         run: |
@@ -42,6 +41,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: RhythmCore-AdMaker-Android-v7.0.8-SUPER-GRITTY-BW
+          name: RhythmCore-AdMaker-Android-v7.0.9-MAC-TRANSITIONS
           path: android-project/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
