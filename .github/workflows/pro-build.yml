@@ -1,4 +1,4 @@
-name: Natural Fades Gunshot APK Build
+name: Clean DJ Audio APK Build
 
 on:
   workflow_dispatch:
@@ -25,11 +25,11 @@ jobs:
         with:
           gradle-version: "8.13"
 
-      - name: Download natural-fades source
+      - name: Download clean DJ audio source
         run: |
           rm -rf android-project
           mkdir -p android-project
-          curl -fL --retry 3 "https://rhythmcore-admaker.floot.app/_cdn/static/4f0a71ce-ad89-447b-9b15-b5e515dbd2d8-RhythmCore-AdMaker-Android-v7.1.4-NATURAL-FADES-GUNSHOT-source.zip" -o /tmp/rc.zip
+          curl -fL --retry 3 "https://rhythmcore-admaker.floot.app/_cdn/static/1e04aadf-ba11-4a58-95aa-15d9f214ce15-RhythmCore-AdMaker-Android-v7.1.5-CLEAN-DJ-AUDIO-source.zip" -o /tmp/rc.zip
           unzip -o /tmp/rc.zip -d android-project
           test -f android-project/app/src/main/java/com/rhythmcoredj/admaker/MainActivity.kt
 
@@ -41,6 +41,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: RhythmCore-AdMaker-Android-v7.1.4-NATURAL-FADES-GUNSHOT
+          name: RhythmCore-AdMaker-Android-v7.1.5-CLEAN-DJ-AUDIO
           path: android-project/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
