@@ -1,4 +1,4 @@
-name: Vinyl Ramp APK Build
+name: Clean Vinyl Audio APK Build
 
 on:
   workflow_dispatch:
@@ -25,11 +25,11 @@ jobs:
         with:
           gradle-version: "8.13"
 
-      - name: Download vinyl-ramp source
+      - name: Download clean vinyl audio source
         run: |
           rm -rf android-project
           mkdir -p android-project
-          curl -fL --retry 3 "https://rhythmcore-admaker.floot.app/_cdn/static/18318cbe-0125-481f-b810-97138116eae5-RhythmCore-AdMaker-Android-v7.1.2-VINYL-RAMP-source-v2.zip" -o /tmp/rc.zip
+          curl -fL --retry 3 "https://rhythmcore-admaker.floot.app/_cdn/static/c3acb1e6-27c3-403b-b70a-aa403c7b688a-RhythmCore-AdMaker-Android-v7.1.3-CLEAN-VINYL-AUDIO-source.zip" -o /tmp/rc.zip
           unzip -o /tmp/rc.zip -d android-project
           test -f android-project/app/src/main/java/com/rhythmcoredj/admaker/MainActivity.kt
 
@@ -41,6 +41,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: RhythmCore-AdMaker-Android-v7.1.2-VINYL-RAMP
+          name: RhythmCore-AdMaker-Android-v7.1.3-CLEAN-VINYL-AUDIO
           path: android-project/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
