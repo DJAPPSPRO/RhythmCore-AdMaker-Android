@@ -1,4 +1,4 @@
-name: Audible Audio Styles APK Build
+name: DJ Mix Intro APK Build
 
 on:
   workflow_dispatch:
@@ -25,81 +25,22 @@ jobs:
         with:
           gradle-version: "8.13"
 
-      - name: Download v7.1.7 source
+      - name: Download DJ mix source
         run: |
           rm -rf android-project
           mkdir -p android-project
-          curl -fL --retry 3 "https://rhythmcore-admaker.floot.app/_cdn/static/545e6ff9-0148-44ee-9dba-b9fcc7bf9c07-RhythmCore-AdMaker-Android-v7.1.7-AUDIO-STYLES-RESTORED-source.zip" -o /tmp/rc.zip
+          curl -fL --retry 3 "https://rhythmcore-admaker.floot.app/_cdn/static/11203818-d5be-4f99-b0f3-62f7169ff39e-RhythmCore-AdMaker-Android-v7.1.9-DJ-MIX-INTRO-source.zip" -o /tmp/rc.zip
           unzip -o /tmp/rc.zip -d android-project
           test -f android-project/app/src/main/java/com/rhythmcoredj/admaker/MainActivity.kt
-
-      - name: Make audio styles clearly audible
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-
-          p = Path("android-project/app/src/main/java/com/rhythmcoredj/admaker/MainActivity.kt")
-          s = p.read_text()
-
-          replacements = {
-              "AudioStyle.CLEAN -> 40L": "AudioStyle.CLEAN -> 0L",
-              "AudioStyle.VINYL -> 150L": "AudioStyle.VINYL -> 520L",
-              "AudioStyle.DJ_CUT -> 220L": "AudioStyle.DJ_CUT -> 680L",
-              "AudioStyle.CINEMATIC -> 320L": "AudioStyle.CINEMATIC -> 820L",
-              "AudioStyle.CLEAN -> 80L": "AudioStyle.CLEAN -> 0L",
-              "AudioStyle.VINYL -> 380L": "AudioStyle.VINYL -> 1_100L",
-              "AudioStyle.DJ_CUT -> 480L": "AudioStyle.DJ_CUT -> 900L",
-              "AudioStyle.CINEMATIC -> 650L": "AudioStyle.CINEMATIC -> 1_250L",
-
-              "white * exp(-p * 38.0) * 0.14": "white * exp(-p * 34.0) * 0.55",
-              "smoothNoise * (1.0 - p) * 0.020": "smoothNoise * (1.0 - p) * 0.080",
-              "sin(phase) * inv * 0.065 + smoothNoise * inv * 0.022": "sin(phase) * inv * 0.30 + smoothNoise * inv * 0.080",
-
-              "smoothNoise * gate * (1.0 - p) * 0.055": "smoothNoise * gate * (1.0 - p) * 0.24",
-              "scratch + sin(phase) * (1.0 - p) * 0.045": "scratch + sin(phase) * (1.0 - p) * 0.20",
-              "sin(phase) * inv * gate * 0.075 + smoothNoise * inv * 0.028": "sin(phase) * inv * gate * 0.34 + smoothNoise * inv * 0.16",
-
-              "sin(phase) * rise * 0.07 + sin(phase2) * rise * 0.025 + smoothNoise * rise * 0.020": "sin(phase) * rise * 0.24 + sin(phase2) * rise * 0.10 + smoothNoise * rise * 0.16",
-              "sin(2.0 * PI * 48.0 * t) * exp(-impactQ * 8.0) * 0.11": "sin(2.0 * PI * 48.0 * t) * exp(-impactQ * 8.0) * 0.48",
-              "sin(phase) * inv * 0.055 + impact + smoothNoise * inv * 0.018": "sin(phase) * inv * 0.24 + impact + smoothNoise * inv * 0.12",
-
-              "kotlin.math.tanh(value * 0.9).coerceIn(-0.72, 0.72)": "kotlin.math.tanh(value * 1.30).coerceIn(-0.92, 0.92)"
-          }
-
-          for old, new in replacements.items():
-              if old not in s:
-                  print("WARN missing:", old)
-              s = s.replace(old, new)
-
-          s = s.replace(
-              'statusText.text = "Audio style: ${audioStyle.label} • rendering…"',
-              'statusText.text = "Audio style: ${audioStyle.label} • AUDIBLE FX • rendering…"'
-          )
-
-          p.write_text(s)
-
-          for bp in Path("android-project").rglob("build.gradle.kts"):
-              t = bp.read_text()
-              t = re.sub(r'versionName\s*=\s*"[^"]+"', 'versionName = "7.1.8-audible-audio-styles"', t)
-              bp.write_text(t)
-          PY
 
       - name: Build APK
         run: |
           cd android-project
           gradle assembleDebug --stacktrace
 
-      - name: Package source
-        run: |
-          cd android-project
-          zip -qr ../RhythmCore-AdMaker-Android-v7.1.8-AUDIBLE-AUDIO-STYLES-source.zip .
-
-      - name: Upload build
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: RhythmCore-AdMaker-Android-v7.1.8-AUDIBLE-AUDIO-STYLES
-          path: |
-            android-project/app/build/outputs/apk/debug/app-debug.apk
-            RhythmCore-AdMaker-Android-v7.1.8-AUDIBLE-AUDIO-STYLES-source.zip
+          name: RhythmCore-AdMaker-Android-v7.1.9-DJ-MIX-INTRO
+          path: android-project/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
