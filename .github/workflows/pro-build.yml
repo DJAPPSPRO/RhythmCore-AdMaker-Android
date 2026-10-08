@@ -1,4 +1,4 @@
-name: Clean DJ Audio APK Build
+name: Safe Branding APK Build
 
 on:
   workflow_dispatch:
@@ -25,11 +25,11 @@ jobs:
         with:
           gradle-version: "8.13"
 
-      - name: Download clean DJ audio source
+      - name: Download safe-branding source
         run: |
           rm -rf android-project
           mkdir -p android-project
-          curl -fL --retry 3 "https://rhythmcore-admaker.floot.app/_cdn/static/76fb316e-62b4-4ea7-9b47-3999b4ef8432-RhythmCore-AdMaker-Android-v7.1.5-CLEAN-DJ-AUDIO-source.zip" -o /tmp/rc.zip
+          curl -fL --retry 3 "https://rhythmcore-admaker.floot.app/_cdn/static/4d6146fb-8f63-4419-ab69-6ae195769d02-RhythmCore-AdMaker-Android-v7.1.6-SAFE-BRANDING-source.zip" -o /tmp/rc.zip
           unzip -o /tmp/rc.zip -d android-project
           test -f android-project/app/src/main/java/com/rhythmcoredj/admaker/MainActivity.kt
 
@@ -41,6 +41,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: RhythmCore-AdMaker-Android-v7.1.5-CLEAN-DJ-AUDIO
+          name: RhythmCore-AdMaker-Android-v7.1.6-SAFE-BRANDING
           path: android-project/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
